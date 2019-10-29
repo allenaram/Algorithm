@@ -12,6 +12,7 @@
 #include <cmath>
 #include <cstdlib>
 #include <unordered_map>
+#include <unordered_set>
 
 
 using namespace std;
@@ -39,6 +40,8 @@ struct BTNode
 	}
 };
 
+
+/*JianZhi Start*/
 
 
 /*-------------------------------                     
@@ -2506,13 +2509,2526 @@ public:
 
 
 
+/*Leetcode start*/
+
+/*-----------------------------------------------------
+	leetcode 1
+------------------------------------------------------*/
+vector<int> twoSum(vector<int>& nums, int target)
+{
+	vector<int> answer;
+	unordered_map<int, int> hashmap; //(value, index)
+
+	for (int i = 0; i < nums.size(); i++)
+	{
+		unordered_map<int, int>::iterator it;
+		it = hashmap.find(target - nums[i]);
+		if (it == hashmap.end())
+			hashmap[nums[i]] = i;
+		else if (i != it->second)
+		{
+			answer.push_back(i);
+			answer.push_back(it->second);
+			break;
+		}
+	}
+	return answer;
+}
+
+
+/*-----------------------------------------------------
+	leetcode 2
+------------------------------------------------------*/
+struct ListNode
+{
+	int val;
+	ListNode *next;
+	ListNode(int x) : val(x), next(NULL) {}
+};
+class Solution2 {
+public:
+	ListNode* addTwoNumbers(ListNode* l1, ListNode* l2)
+	{
+		ListNode* head = new ListNode(0);
+		ListNode* cur = head;
+		int v1 = l1->val;
+		int v2 = l2->val;
+		int carry = 0;
+		int val = 0;
+		while (l1 || l2)
+		{
+			v1 = l1 ? l1->val : 0;
+			v2 = l2 ? l2->val : 0;
+			val = v1 + v2 + carry;
+			carry = val > 9 ? 1 : 0;
+			cur->next = new ListNode(val % 10);
+			cur = cur->next;
+			l1 = l1 ? l1->next : NULL;
+			l2 = l2 ? l2->next : NULL;
+		}
+		if (carry > 0)
+		{
+			cur->next = new ListNode(carry);
+		}
+		return head->next;
+	}
+};
+
+
+/*-----------------------------------------------------
+	leetcode 3
+------------------------------------------------------*/
+class Solution3 {
+public:
+	int lengthOfLongestSubstring(string s) {
+		int maxSubstrLen = 0;
+		int Len = 0;
+		int back = 0;
+		unordered_set<char> hashset;
+		for (int i = 0; i < s.length(); i++)
+		{
+			if (hashset.find(s[i]) == hashset.end())
+			{
+				hashset.insert(s[i]);
+				Len++;
+			}
+			else
+			{
+				if (Len > maxSubstrLen)
+					maxSubstrLen = Len;
+				Len = 0;
+				back = 0;
+				hashset.clear();
+				while (hashset.find(s[i - back]) == hashset.end())
+				{
+					hashset.insert(s[i - back]);
+					Len++;
+					back++;
+				}
+			}
+		}
+		if (Len > maxSubstrLen)
+			maxSubstrLen = Len;
+		cout << maxSubstrLen;
+		return maxSubstrLen;
+	}
+};
+
+
+/*-----------------------------------------------------
+	leetcode 5
+------------------------------------------------------*/
+class Solution5 {
+public:
+	string longestPalinedrome(string s)	//动态规划版
+	{
+		int maxi = 0;
+		int maxlen = 1;
+		bool matrix[1000][1000] = { false };
+		for (int i = 0; i < s.length(); i++)
+			matrix[i][i] = true;
+		for (int i = 0; i < s.length() - 1; i++)
+		{
+			if (s[i] == s[i + 1])
+			{
+				matrix[i][i + 1];
+				maxlen = 2;
+				maxi = i;
+			}
+
+		}
+		for (int l = 3; l < s.length(); l++)
+			for (int i = 0; i + l - 1 < s.length(); i++)
+			{
+				if (matrix[i + 1][i + l - 2] && s[i + 1] == s[i + l - 2])
+				{
+					matrix[i][i + l - 1] = true;
+					if (l > maxlen)
+					{
+						maxi = i;
+						maxlen = l;
+					}
+				}
+			}
+		return s.substr(maxi, maxlen);
+
+
+	}
+
+
+	string longestPalindrome1(string s) {	//暴力递归版
+		int max = 1;
+		int maxi = 0;
+		int i, j;
+		for (i = 0; i < s.length(); i++)
+		{
+			for (j = i; j < s.length(); j++)
+				if (process(i, j, s) && (j - i + 1) > max)
+				{
+					max = j - i + 1;
+					maxi = i;
+				}
+		}
+		return s.substr(maxi, max);
+	}
+
+	bool process(int i, int j, string s)
+	{
+		if (i >= j)
+			return true;
+		if (i + 1 == j)
+			return s[i] == s[j];
+		return (process(i + 1, j - 1, s) && s[i] == s[j]);
+	}
+};
+
+
+/*-----------------------------------------------------
+	leetcode 6
+------------------------------------------------------*/
+class Solution6 {
+public:
+	string convert(string s, int numRows) {
+		if (numRows == 1)
+			return s;
+
+		int len = s.length();
+		vector<string> strs(min(numRows, len));
+		bool flag = false;
+		int i = 0;
+		for (char c : s)
+		{
+			strs[i] += c;
+			if (i == 0 || i == numRows - 1)
+				flag = !flag;
+			i = flag ? i + 1 : i - 1;
+		}
+
+
+		string fs = "";
+		for (int i = 0; i < strs.size(); i++)
+			fs += strs[i];
+		return fs;
+	}
+
+	string convert2(string s, int numRows)
+	{
+		if (numRows == 1) return s;
+
+		string ret;
+		int n = s.size();
+		int cycleLen = 2 * numRows - 2;
+
+		for (int i = 0; i < numRows; i++) {
+			for (int j = 0; j + i < n; j += cycleLen) {
+				ret += s[j + i];
+				if (i != 0 && i != numRows - 1 && j + cycleLen - i < n)
+					ret += s[j + cycleLen - i];
+			}
+		}
+		return ret;
+	}
+};
+
+
+/*-----------------------------------------------------
+	leetcode 7  注意溢出情况
+------------------------------------------------------*/
+class Solution7 {
+public:
+	int reverse(int x) {
+		int rev = 0;
+		while (x != 0) {
+			int pop = x % 10;
+			x /= 10;
+			if (rev > INT_MAX / 10 || (rev == INT_MAX / 10 && pop > 7)) return 0;
+			if (rev < INT_MIN / 10 || (rev == INT_MIN / 10 && pop < -8)) return 0;
+			rev = rev * 10 + pop;
+		}
+		return rev;
+	}
+};
+
+
+/*-----------------------------------------------------
+	leetcode 429
+------------------------------------------------------*/
+class Node429 {
+public:
+	int val;
+	vector<Node429*> children;
+
+	Node429() {}
+
+	Node429(int _val, vector<Node429*> _children) {
+		val = _val;
+		children = _children;
+	}
+};
+class Solution429 {
+public:
+	vector<vector<int>> levelOrder(Node429* root) {
+		vector<vector<int>> res;
+		vector<int> res0;
+		queue<Node429*> Q;
+		if (!root)
+			return res;
+		Q.push(root);
+		int cur = 1;
+		int next = 0;
+
+		Node429* c = NULL;
+		while (!Q.empty())
+		{
+			c = Q.front();
+			res0.push_back(c->val);
+			Q.pop();
+			cur--;
+			for (int i = 0; i < c->children.size(); i++)
+			{
+				Q.push(c->children[i]);
+				next++;
+			}
+			if (cur == 0)
+			{
+				cur = next;
+				next = 0;
+				res.push_back(res0);
+				res0.clear();
+			}
+		}
+		return res;
+	}
+};
+
+
+/*-----------------------------------------------------
+	leetcode 9
+------------------------------------------------------*/
+class Solution8 {
+public:
+	bool isPalindrome(int x) {
+		string str;
+		if (x < 0)
+			return 0;
+		int val = 0;
+		while (x != 0)
+		{
+			str.push_back(x % 10);
+			x /= 10;
+		}
+		for (int i = 0; i <= str.size() / 2; i++)
+		{
+			if (str[i] != str[str.size() - 1 - i])
+				return false;
+		}
+		return true;
+	}
+	bool isPalindrome2(int x) {
+		if (x >= 0 && x < 10)
+			return true;
+		if (x < 0 || x % 10 == 0)
+			return false;
+		int tmp = x;
+		int num = 0;
+		while (tmp != 0)
+		{
+			tmp /= 10;
+			num++;
+		}
+		num /= 2;
+
+		for (int i = 0; i < num; i++)
+		{
+			tmp = 10 * tmp + x % 10;
+			x /= 10;
+		}
+		if (x < 10 && tmp < 10)
+			return x == tmp;
+		return x == tmp || x / 10 == tmp;
+
+	}
+};
+
+
+/*-----------------------------------------------------
+	leetcode 11
+------------------------------------------------------*/
+class Solution11 {
+public:
+	int maxArea(vector<int>& height) {
+		int i = 0;
+		int j = height.size() - 1;
+		int maxi = i;
+		int maxj = j;
+		int maxV = 0;
+		int V = 0;
+		while (i < j)
+		{
+			V = min(height[i], height[j])*(j - i);
+			if (V > maxV)
+			{
+				maxV = V;
+				maxi = i;
+				maxj = j;
+			}
+			if (height[i] < height[j])
+				i++;
+			else if (height[i] > height[j])
+				j--;
+			else
+			{
+				i++; j--;
+			}
+		}
+		return maxV;
+	}
+};
+
+
+/*-----------------------------------------------------
+	leetcode 12
+------------------------------------------------------*/
+class Solution12 {
+public:
+	string intToRoman(int num) {
+		string str;
+		while (num > 0)
+		{
+			if (num >= 1000)
+			{
+				str += 'M';
+				num -= 1000;
+			}
+			else if (num >= 900)
+			{
+				str += "CM";
+				num -= 900;
+			}
+			else if (num >= 500)
+			{
+				str += 'D';
+				num -= 500;
+			}
+			else if (num >= 400)
+			{
+				str += "CD";
+				num -= 400;
+			}
+			else if (num >= 100)
+			{
+				str += 'C';
+				num -= 100;
+			}
+			else if (num >= 90)
+			{
+				str += "XC";
+				num -= 90;
+			}
+			else if (num >= 50)
+			{
+				str += 'L';
+				num -= 50;
+			}
+			else if (num >= 40)
+			{
+				str += "XL";
+				num -= 40;
+			}
+			else if (num >= 10)
+			{
+				str += 'X';
+				num -= 10;
+			}
+			else if (num >= 9)
+			{
+				str += "IX";
+				num -= 9;
+			}
+			else if (num >= 5)
+			{
+				str += 'V';
+				num -= 5;
+			}
+			else if (num >= 4)
+			{
+				str += "IV";
+				num -= 4;
+			}
+			else if (num >= 1)
+			{
+				str += 'I';
+				num -= 1;
+			}
+		}
+		return str;
+	}
+};
+
+
+/*-----------------------------------------------------
+	leetcode 13
+------------------------------------------------------*/
+class Solution13 {
+public:
+	int romanToInt(string s) {
+		int num = 0;
+		if (s.empty())
+			return num;
+		int i = 0;
+		while (i < s.size())
+		{
+			if (s[i] == 'M')
+			{
+				num += 1000;
+				i++;
+			}
+			else if (s[i] == 'D')
+			{
+				num += 500;
+				i++;
+			}
+			else if (s[i] == 'C')
+			{
+				if (s[i + 1] == 'M' && i != s.size() - 1)
+				{
+					num += 900;
+					i += 2;
+				}
+				else if (s[i + 1] == 'D' && i != s.size() - 1)
+				{
+					num += 400;
+					i += 2;
+				}
+				else
+				{
+					num += 100;
+					i++;
+				}
+			}
+			else if (s[i] == 'L')
+			{
+				num += 50;
+				i++;
+			}
+			else if (s[i] == 'X')
+			{
+				if (s[i + 1] == 'C' && i != s.size() - 1)
+				{
+					num += 90;
+					i += 2;
+				}
+				else if (s[i + 1] == 'L' && i != s.size() - 1)
+				{
+					num += 40;
+					i += 2;
+				}
+				else
+				{
+					num += 10;
+					i++;
+				}
+			}
+			else if (s[i] == 'V')
+			{
+				num += 5;
+				i++;
+			}
+			else if (s[i] == 'I')
+			{
+				if (s[i + 1] == 'X' && i != s.size() - 1)
+				{
+					num += 9;
+					i += 2;
+				}
+				else if (s[i + 1] == 'V' && i != s.size() - 1)
+				{
+					num += 4;
+					i += 2;
+				}
+				else
+				{
+					num += 1;
+					i++;
+				}
+			}
+		}
+		return num;
+	}
+
+	int romamToInt2(string s)
+	{
+		unordered_map<char, int> hash;
+		hash['I'] = 1;
+		hash['V'] = 5;
+		hash['X'] = 10;
+		hash['L'] = 50;
+		hash['C'] = 100;
+		hash['D'] = 500;
+		hash['M'] = 1000;
+
+		int num = 0;
+		int i = 0;
+		int cur = 0;
+		int nxt = 0;
+		while (i < s.size())
+		{
+			cur = hash[s[i]];
+			if (i == s.size() - 1)
+			{
+				num += cur;
+				break;
+			}
+			nxt = hash[s[i + 1]];
+			if (cur < nxt)
+			{
+				num += (nxt - cur);
+				i += 2;
+			}
+			else
+			{
+				num += cur;
+				i += 1;
+			}
+
+		}
+		return num;
+	}
+};
+
+
+/*-----------------------------------------------------
+	leetcode 14
+------------------------------------------------------*/
+class Solution14 {
+public:
+	string longestCommonPrefix(vector<string>& strs) {
+		if (strs.size() == 0)
+			return "";
+		string first = strs[0];
+		int len = 0;
+		for (int j = 0; j < first.size(); j++)
+		{
+			for (int i = 0; i < strs.size(); i++)
+			{
+				if (strs[i].size() - 1 < j)
+					return first.substr(0, len);
+				if (first[j] != strs[i][j])
+					return first.substr(0, len);
+			}
+			len++;
+		}
+		return first.substr(0, len);
+	}
+
+	string longestCommonPrefix2(vector<string>& strs)
+	{
+		if (strs.size() == 0)
+			return "";
+		if (strs.size() == 1)
+			return strs[0];
+
+		int low = 0;
+		int high = strs[0].size() / 2;
+		while (low <= high)
+		{
+			if (process(strs, low, high))
+			{
+				low = high + 1;
+				high = (low + 2 * high) / 2;
+			}
+			else if (low == high)
+				break;
+			else
+				high = (low + high) / 2;
+		}
+		return strs[0].substr(0, low);
+	}
+
+	bool process(vector<string>& strs, int low, int high)
+	{
+		for (int i = 1; i < strs.size(); i++)
+		{
+			for (int j = low; j <= high; j++)
+			{
+				if (strs[i].size() < j + 1)
+					return false;
+				if (strs[0][j] != strs[i][j])
+					return false;
+			}
+		}
+		return true;
+	}
+
+};
+
+
+/*-----------------------------------------------------
+	leetcode 15
+------------------------------------------------------*/
+class Solution15 {
+public:
+	vector<vector<int>> threeSum(vector<int>& nums) {
+		vector<vector<int>> res;
+		sort(nums.begin(), nums.end());
+
+		int start = 0;
+		int end = 0;
+		int val = 0;
+		for (int i = 0; i < nums.size(); i++)
+		{
+			if (i > 0)
+				if (nums[i] == nums[i - 1])
+					continue;
+			start = i + 1;
+			end = nums.size() - 1;
+			while (start < end)
+			{
+				val = nums[i] + nums[start] + nums[end];
+				if (val == 0)
+				{
+					res.push_back({ nums[i], nums[start], nums[end] });
+					do
+						end--;
+					while (nums[end] == nums[end + 1] && end > 0);
+					do
+						start++;
+					while (nums[start] == nums[start - 1] && start < nums.size() - 1);
+				}
+				else if (val > 0)
+					end--;
+				else
+					start++;
+			}
+		}
+		return res;
+
+	}
+};
+
+
+/*-----------------------------------------------------
+	leetcode 16
+------------------------------------------------------*/
+class Solution16 {
+public:
+	int threeSumClosest(vector<int>& nums, int target) {
+		int best = nums[0] + nums[1] + nums[2];
+		sort(nums.begin(), nums.end());
+
+		int start = 0;
+		int end = nums.size() - 1;
+		int val = 0;
+		for (int i = 0; i < nums.size(); i++)
+		{
+			start = i + 1;
+			end = nums.size() - 1;
+			if (i > 0)
+				if (nums[i] == nums[i - 1])
+					continue;
+			while (start < end)
+			{
+				val = nums[i] + nums[start] + nums[end];
+				if (val - target == 0)
+					return target;
+				else if (abs(val - target) < abs(best - target))
+					best = val;
+				if (val > target)
+					end--;
+				else
+					start++;
+			}
+		}
+		return best;
+	}
+};
+
+
+/*-----------------------------------------------------
+	leetcode 17
+------------------------------------------------------*/
+class Solution17 {
+public:
+	vector<string> letterCombinations(string digits) {
+		vector<string> strs;
+		if (digits.empty())
+			return strs;
+		string res = "";
+		unordered_map<char, string> map{ {'2', "abc"}, {'3', "def"}, {'4', "ghi"},
+										 {'5', "jkl"}, {'6', "mno"}, {'7', "pqrs"},
+										 {'8', "tuv"}, {'9', "wxyz"} };
+		process(digits, res, map, strs);
+		return strs;
+	}
+
+	void process(string &digits, string res, unordered_map<char, string>& map, vector<string> &strs)
+	{
+		int start = res.size();
+		string candidates = map[digits[start]];
+		if (start == digits.size())
+			return;
+
+		for (char c : candidates)
+		{
+			if (start == digits.size() - 1)
+				strs.push_back(res + c);
+			process(digits, res + c, map, strs);
+		}
+	}
+};
+
+
+/*-----------------------------------------------------
+	leetcode 18
+------------------------------------------------------*/
+class Solution18 {
+public:
+	vector<vector<int>> fourSum(vector<int>& nums, int target) {
+		vector<vector<int>> res;
+
+		if (nums.size() < 4)
+			return res;
+
+		sort(nums.begin(), nums.end());
+		int start = 0;
+		int end = 0;
+		int val = 0;
+		for (int i = 0; i < nums.size() - 3; i++)
+		{
+			if (nums[i] > target && nums[i] >= 0)
+				return res;
+			if (i > 0)
+				if (nums[i] == nums[i - 1])
+					continue;
+			for (int j = i + 1; j < nums.size() - 2; j++)
+			{
+				if (nums[i] + nums[j] > target && nums[j] >= 0)
+					break;
+				if (j > i + 1)
+					if (nums[j] == nums[j - 1])
+						continue;
+				start = j + 1;
+				end = nums.size() - 1;
+				while (start < end)
+				{
+					val = nums[i] + nums[j] + nums[start] + nums[end];
+					if (val == target)
+					{
+						res.push_back({ nums[i], nums[j], nums[start], nums[end] });
+						do
+							end--;
+						while (nums[end] == nums[end + 1] && end > j);
+						do
+							start++;
+						while (nums[start] == nums[start - 1] && start < nums.size() - 1);
+					}
+					else if (val > target)
+						end--;
+					else
+						start++;
+
+				}
+			}
+		}
+		return res;
+	}
+};
+
+
+/*-----------------------------------------------------
+	leetcode 19
+------------------------------------------------------*/
+struct ListNode19 {
+	int val;
+	ListNode19 *next;
+	ListNode19(int x) : val(x), next(NULL) {}
+};
+class Solution19 {
+public:
+	ListNode19* removeNthFromEnd(ListNode19* head, int n) {
+		ListNode19* Head = new ListNode19(0);
+		Head->next = head;
+		ListNode19* forward = Head;
+		ListNode19* back = Head;
+		for (int i = 0; i < n + 1; i++)
+			forward = forward->next;
+
+		while (forward)
+		{
+			forward = forward->next;
+			back = back->next;
+		}
+		forward = back->next;
+		back->next = back->next->next;
+		if (forward)
+			delete forward;
+		return Head->next;
+	}
+};
+
+
+/*-----------------------------------------------------
+	leetcode 20
+------------------------------------------------------*/
+class Solution20 {
+public:
+	bool isValid(string s) {
+		if (s.empty())
+			return true;
+		if (s.size() % 2 != 0)
+			return false;
+		stack<char> S;
+		unordered_map<char, char> map{ {')','('}, {'}', '{'}, {']', '['} };
+		for (int i = 0; i < s.size(); i++)
+		{
+			if (s[i] == '(' || s[i] == '{' || s[i] == '[')
+				S.push(s[i]);
+			else
+			{
+				if (S.empty())
+					return false;
+				if (S.top() == map[s[i]])
+					S.pop();
+				else
+					return false;
+			}
+		}
+		if (S.empty())
+			return true;
+		else
+			return false;
+	}
+};
+
+
+/*-----------------------------------------------------
+	leetcode 21
+------------------------------------------------------*/
+struct ListNode21 {
+	int val;
+	ListNode21 *next;
+	ListNode21(int x) : val(x), next(NULL) {}
+};
+class Solution21 {
+public:
+	ListNode21* mergeTwoLists(ListNode21* l1, ListNode21* l2) {
+		ListNode21* res = new ListNode21(0);
+		ListNode21* cur = res;
+
+		while (l1 && l2)
+		{
+			if (l1->val <= l2->val)
+			{
+				cur->next = l1;
+				cur = cur->next;
+				l1 = l1->next;
+			}
+			else
+			{
+				cur->next = l2;
+				cur = cur->next;
+				l2 = l2->next;
+			}
+		}
+		cur->next = l1 ? l1 : l2;
+		return res->next;
+	}
+};
+
+
+/*-----------------------------------------------------
+	leetcode 22
+------------------------------------------------------*/
+class Solution22 {
+public:
+	vector<string> generateParenthesis(int n) {
+		string res = "";
+		vector<string> strs;
+		process(n, 0, 0, true, res, strs);
+		return strs;
+	}
+
+	void process(int& n, int l, int r, bool choose_l, string res, vector<string>& strs)
+	{
+		if (res.size() == 2 * n)
+			strs.push_back(res);
+		if (l < n)
+		{
+			l++;
+			process(n, l, r, true, res + '(', strs);
+			l--;
+		}
+		if (r < n && l > r)
+		{
+			r++;
+			process(n, l, r, false, res + ')', strs);
+		}
+	}
+
+};
+
+
+/*-----------------------------------------------------
+	leetcode 23
+------------------------------------------------------*/
+struct ListNode23 {
+	int val;
+	ListNode23 *next;
+	ListNode23(int x) : val(x), next(NULL) {}
+};
+class Solution23 {
+public:
+	ListNode23* swapPairs(ListNode23* head) {
+		ListNode23* pre = head;
+		ListNode23* prepre = NULL;
+		ListNode23* cur = NULL;
+		ListNode23* nxt = NULL;
+		if (!head || !head->next)
+			return head;
+		head = head->next;
+		cur = head;
+		while (cur)
+		{
+			if (prepre)
+				prepre->next = cur;
+			nxt = cur->next;
+			cur->next = pre;
+			pre->next = nxt;
+			if (!nxt || !nxt->next)
+				return head;
+			prepre = pre;
+			pre = nxt;
+			cur = nxt->next;
+		}
+		return head;
+	}
+
+	ListNode23* swapPairs2(ListNode23* head)
+	{
+		if (!head || !head->next)
+			return head;
+
+		ListNode23* nxt = head->next;
+		head->next = swapPairs2(nxt->next);
+		nxt->next = head;
+		return nxt;
+	}
+};
+
+
+/*-----------------------------------------------------
+	leetcode 24
+------------------------------------------------------*/
+class Solution24 {
+public:
+	int removeDuplicates(vector<int>& nums) {
+		if (nums.empty())
+			return 0;
+		int r_idx = 1;
+		for (int i = 1; i < nums.size(); i++)
+		{
+			if (nums[i] != nums[i - 1])
+				nums[r_idx++] = nums[i];
+		}
+		return r_idx;
+	}
+};
+
+
+/*-----------------------------------------------------
+	leetcode 25
+------------------------------------------------------*/
+class Solution25 {
+public:
+	int removeElement(vector<int>& nums, int val) {
+		if (nums.empty())
+			return 0;
+		int idx = 0;
+		int i = 0;
+		while (i < nums.size())
+		{
+			if (nums[i] != val)
+				swap(nums[i], nums[idx++]);
+			i++;
+		}
+		return idx;
+	}
+};
+
+
+/*-----------------------------------------------------
+	leetcode 26
+------------------------------------------------------*/
+class Solution26 {
+public:
+	int strStr(string haystack, string needle) {
+		return haystack.find(needle);
+	}
+};
+
+
+/*-----------------------------------------------------
+	leetcode 27
+------------------------------------------------------*/
+class Solution27 {
+public:
+	int divide(int dividend, int divisor) {
+		if (divisor == 1)
+			return dividend;
+		if (divisor == -1 && dividend == INT_MIN)
+			return INT_MAX;
+		if (divisor == -1)
+			return -dividend;
+		if (divisor == INT_MIN)
+			return 0;
+		if (dividend == INT_MIN)
+			dividend = dividend + 1;//2^31/2与（2^31-1）/2结果相同
+
+		bool isPositive = false;
+		if (dividend > 0 && divisor > 0 || dividend < 0 && divisor < 0)
+			isPositive = true;
+		dividend = abs(dividend);
+		divisor = abs(divisor);
+
+		int cnt = 0;
+		while (dividend >= divisor)
+		{
+			int cnt_base = 1;
+			int base = divisor;
+			while (dividend > base)
+			{
+				if (base <= INT_MAX / 2 && base < dividend / 2)
+				{
+					base <<= 1;
+					cnt_base <<= 1;
+				}
+				else
+					break;
+			}
+			dividend -= base;
+			cnt += cnt_base;
+		}
+		if (isPositive)
+			return cnt;
+		else
+			return -cnt;
+	}
+};
+
+
+/*-----------------------------------------------------
+	leetcode 31
+------------------------------------------------------*/
+class Solution31 {
+public:
+	void nextPermutation(vector<int>& nums) {
+		if (nums.size() == 0 || nums.size() == 1)
+			return;
+		int i = 0;
+		int j = 0;
+		for (i = nums.size() - 2; i >= 0; i--)
+		{
+			if (nums[i] < nums[i + 1])
+				break;
+		}
+		if (i > -1)
+			for (j = nums.size() - 1; j > 0; j--)
+			{
+				if (nums[j] > nums[i])
+				{
+					swap(nums[i], nums[j]);
+					break;
+				}
+			}
+		for (j = i + 1; j <= (i + nums.size() - 1) / 2; j++)
+		{
+			swap(nums[j], nums[nums.size() - 1 - (j - i - 1)]);
+		}
+	}
+};
+
+
+/*-----------------------------------------------------
+	leetcode 33
+------------------------------------------------------*/
+class Solution33 {
+public:
+	int search(vector<int>& nums, int target) {
+		return search(nums, 0, nums.size() - 1, target);
+	}
+
+	int search(vector<int>& nums, int low, int high, int target)
+	{
+		if (low > high)
+			return -1;
+		int mid = (low + high) / 2;
+		if (target == nums[mid])
+			return mid;
+		if (nums[mid] <= nums[high])
+		{
+			if (target > nums[mid] && target <= nums[high])
+				return search(nums, mid + 1, high, target);
+			else
+				return search(nums, low, mid - 1, target);
+		}
+		else
+		{
+			if (target >= nums[low] && target < nums[mid])
+				return search(nums, low, mid - 1, target);
+			else
+				return search(nums, mid + 1, high, target);
+		}
+	}
+};
+
+
+/*-----------------------------------------------------
+	leetcode 34
+------------------------------------------------------*/
+class Solution34 {
+public:
+	vector<int> searchRange(vector<int>& nums, int target) {
+		vector<int> interval({ -1, -1 });
+		if (nums.empty())
+			return interval;
+		int min = nums.size();
+		int max = -1;
+		search(nums, target, 0, nums.size() - 1, min, max);
+		if (min <= max)
+		{
+			interval[0] = min;
+			interval[1] = max;
+		}
+		return interval;
+	}
+	void search(vector<int>& nums, int target, int low, int high, int& min, int& max)
+	{
+		if (low > high)
+			return;
+		int mid = (low + high) / 2;
+		if (target == nums[mid])
+		{
+			min = mid < min ? mid : min;
+			max = mid > max ? mid : max;
+			search(nums, target, low, mid - 1, min, max);
+			search(nums, target, mid + 1, high, min, max);
+		}
+		else if (target < nums[mid])
+			search(nums, target, low, mid - 1, min, max);
+		else
+			search(nums, target, mid + 1, high, min, max);
+	}
+};
+
+
+/*-----------------------------------------------------
+	leetcode 35
+------------------------------------------------------*/
+class Solution35 {
+public:
+	int searchInsert(vector<int>& nums, int target) {
+		vector<int>::iterator it = nums.begin();
+		while (it < nums.end())
+		{
+			if (*it == target)
+				return distance(nums.begin(), it);
+			else if (*it > target)
+				break;
+			it++;
+		}
+		it = nums.insert(it, target);
+		return  distance(nums.begin(), it);
+	}
+
+	int searchInsert2(vector<int>& nums, int target)
+	{
+		int low = 0;
+		int high = nums.size() - 1;
+		int mid = (low + high) / 2;
+		while (low < high)
+		{
+			mid = (low + high) / 2;
+			if (target == nums[mid])
+				return mid;
+			else if (target < nums[mid])
+				high = mid - 1;
+			else
+				low = mid + 1;
+		}
+		if (nums[low] >= target)
+			return low;
+		else
+			return low + 1;
+	}
+};
+
+
+/*-----------------------------------------------------
+	leetcode 36
+------------------------------------------------------*/
+class Solution36 {
+public:
+	bool isValidSudoku(vector<vector<char>>& board) {
+		unordered_set<char> R[9];//行
+		unordered_set<char> C[9];//列
+		unordered_set<char> B[9];//块
+		char c;
+		int idx;
+		for (int i = 0; i < 3; i++)
+			for (int j = 0; j < 3; j++)
+			{
+				for (int m = 0; m < 3; m++)
+					for (int n = 0; n < 3; n++)
+					{
+						c = board[3 * i + m][3 * j + n];
+						if (c == '.')
+							continue;
+						if (B[3 * i + j].find(c) != B[3 * i + j].end())
+							return false;
+						if (R[3 * i + m].find(c) != R[3 * i + m].end())
+							return false;
+						if (C[3 * j + n].find(c) != C[3 * j + n].end())
+							return false;
+						B[3 * i + j].insert(c);
+						R[3 * i + m].insert(c);
+						C[3 * j + n].insert(c);
+					}
+			}
+		return true;
+	}
+};
+
+
+/*-----------------------------------------------------
+	leetcode 38
+------------------------------------------------------*/
+class Solution38 {
+public:
+	string countAndSay(int n) {
+		return process(n);
+	}
+	string process(int n)
+	{
+		if (n == 1)
+			return "1";
+		if (n == 2)
+			return "11";
+
+		string str = process(n - 1);
+		string res = "";
+		char first = '1';
+		char second = str[0];
+		for (int i = 1; i < str.size(); i++)
+		{
+			if (str[i] != str[i - 1])
+			{
+				res.push_back(first);
+				res.push_back(second);
+				first = '1';
+				second = str[i];
+			}
+			else
+			{
+				first += 1;
+				second = str[i];
+			}
+		}
+		res.push_back(first);
+		res.push_back(second);
+		return res;
+	}
+};
+
+
+/*-----------------------------------------------------
+	leetcode 39
+------------------------------------------------------*/
+class Solution39 {
+public:
+	vector<vector<int>> combinationSum(vector<int>& candidates, int target) {
+		vector<vector<int>> res;
+		vector<int> cur;
+		process(candidates, target, 0, cur, res);
+		return res;
+	}
+	void process(vector<int>& nums, int target, int start, vector<int>& cur, vector<vector<int>>& res)
+	{
+		if (target == 0)
+			res.push_back(cur);
+		else if (target < 0)
+			return;
+
+		for (int i = start; i < nums.size(); i++)
+		{
+			cur.push_back(nums[i]);
+			process(nums, target - nums[i], i, cur, res);
+			cur.pop_back();
+		}
+	}
+};
+
+
+/*-----------------------------------------------------
+	leetcode 40
+------------------------------------------------------*/
+class Solution40 {
+public:
+	vector<vector<int>> combinationSum2(vector<int>& candidates, int target) {
+		sort(candidates.begin(), candidates.end());
+		vector<vector<int>> res;
+		vector<int> cur;
+		process(candidates, target, 0, cur, res);
+		return res;
+	}
+	void process(vector<int>& nums, int target, int start, vector<int>& cur, vector<vector<int>>& res)
+	{
+		if (target == 0)
+		{
+			res.push_back(cur);
+			return;
+		}
+		if (target < 0)
+			return;
+
+		for (int i = start; i < nums.size(); i++)
+		{
+			if (i > start && nums[i] == nums[i - 1])
+				continue;
+			cur.push_back(nums[i]);
+			process(nums, target - nums[i], i + 1, cur, res);
+			cur.pop_back();
+		}
+	}
+};
+
+
+/*-----------------------------------------------------
+	leetcode 41
+------------------------------------------------------*/
+class Solution41 {
+public:
+	string multiply(string num1, string num2) {
+		if (num1 == "0" || num2 == "0")
+			return "0";
+
+		string res = "";
+
+		int carry = 0;
+		int val = 0;
+		char cur;
+
+		int i_res = 0;
+		while (i_res <= num1.size() + num2.size() - 2)
+		{
+			val = 0;
+			for (int i = 0; i < min(num1.size(), res.size() + 1); i++)
+			{
+				int j = i_res - i;
+				if (j > num2.size() - 1)
+					continue;
+				val += (num1[num1.size() - 1 - i] - '0')*(num2[num2.size() - 1 - j] - '0');
+			}
+			val += carry;
+			carry = val / 10;
+			cur = val % 10 + '0';
+			res = cur + res;
+			i_res++;
+		}
+		if (carry > 0 && carry < 10)
+		{
+			cur = carry + '0';
+			res = cur + res;
+		}
+		else if (carry > 10)
+		{
+			cur = carry % 10 + '0';
+			res = cur + res;
+			cur = carry / 10 + '0';
+			res = cur + res;
+		}
+		return res;
+	}
+};
+
+
+/*-----------------------------------------------------
+	leetcode 55
+------------------------------------------------------*/
+class Solution55 {
+public:
+	bool canJump(vector<int>& nums) {//核心思想，能到i位，一定能到i-1位，所以从后往前推，压缩目标位置
+		int target = nums.size() - 1;
+		for (int i = nums.size() - 2; i >= 0; i--)
+		{
+			if (i + nums[i] >= target)
+				target = i;
+		}
+		return target == 0;
+	}
+
+	bool canJump2(vector<int>& nums)//核心思想：从头遍历，不断更新最大到达点
+	{
+		int maxreach = 0;
+		if (nums.size() == 1)
+			return true;
+		for (int cur = 0; cur < nums.size() - 1; cur++)
+		{
+			if (cur > maxreach)
+				break;
+			if (cur + nums[cur] >= nums.size() - 1)
+				return true;
+			if (cur + nums[cur] > maxreach)
+				maxreach = cur + nums[cur];
+		}
+		return false;
+	}
+
+};
+
+
+/*-----------------------------------------------------
+	leetcode 45
+------------------------------------------------------*/
+class Solution45 {
+public:
+	int jump(vector<int>& nums) {
+		if (nums.size() == 1)
+			return 1;
+		return process(nums, 0);
+	}
+	int process(vector<int>& nums, int cur)
+	{
+		if (cur + nums[cur] >= nums.size() - 1)
+			return 0;
+
+		int Min = INT_MAX;
+		int val = 0;
+		for (int i = cur + 1; i <= cur + nums[cur]; i++)
+		{
+			Min = min(process(nums, i), Min);
+			if (Min == 1)
+				break;
+		}
+		return Min == INT_MAX ? Min : Min + 1;
+	}
+	int jump2(vector<int>& nums)
+	{
+		int step = 0;
+		int lastpos = 0;
+		int maxpos = 0;
+		for (int i = 0; i < nums.size(); i++)
+		{
+			if (i > lastpos)
+			{
+				lastpos = maxpos;
+				step += 1;
+			}
+			maxpos = max(maxpos, i + nums[i]);
+		}
+		return step;
+	}
+};
+
+
+/*-----------------------------------------------------
+	leetcode 46
+------------------------------------------------------*/
+class Solution46 {
+public:
+	vector<vector<int>> permute(vector<int>& nums) {
+		vector<vector<int>> res;
+		process(nums, 0, res);
+		return res;
+	}
+	void process(vector<int>& nums, int cur, vector<vector<int>>& res)
+	{
+		if (cur == nums.size())
+		{
+			res.push_back(nums);
+			return;
+		}
+		for (int i = cur; i < nums.size(); i++)
+		{
+			swap(nums[cur], nums[i]);
+			process(nums, cur + 1, res);
+			swap(nums[cur], nums[i]);
+		}
+	}
+};
+
+
+/*-----------------------------------------------------
+	leetcode 47
+------------------------------------------------------*/
+class Solution47 {
+public:
+	vector<vector<int>> permuteUnique(vector<int>& nums) {
+		vector<vector<int>> res;
+		process(nums, 0, res);
+		return res;
+	}
+	void process(vector<int>& nums, int cur, vector<vector<int>>& res)
+	{
+		if (cur == nums.size())
+		{
+			res.push_back(nums);
+			return;
+		}
+		unordered_set<int> hash;
+		for (int i = cur; i < nums.size(); i++)
+		{
+			if (hash.find(nums[i]) == hash.end())
+				hash.insert(nums[i]);
+			else
+				continue;
+			swap(nums[cur], nums[i]);
+			process(nums, cur + 1, res);
+			swap(nums[cur], nums[i]);
+		}
+	}
+};
+
+
+/*-----------------------------------------------------
+	leetcode 48
+------------------------------------------------------*/
+class Solution48 {
+public:
+	void rotate(vector<vector<int>>& matrix) {
+		int x1 = 0;
+		int y1 = 0;
+		int x2 = matrix.size() - 1;
+		int y2 = matrix[0].size() - 1;
+
+		while (x1 < x2)
+		{
+			process(matrix, x1++, y1++, x2--, y2--);
+		}
+	}
+	void process(vector<vector<int>>& m, int x1, int y1, int x2, int y2)
+	{
+		int tmp = 0;
+		for (int i = 0; i < x2 - x1; i++)
+		{
+			tmp = m[x1][y1 + i];
+			m[x1][y1 + i] = m[x2 - i][y1];
+			m[x2 - i][y1] = m[x2][y2 - i];
+			m[x2][y2 - i] = m[x1 + i][y2];
+			m[x1 + i][y2] = tmp;
+		}
+	}
+};
+
+
+/*-----------------------------------------------------
+	leetcode 49
+------------------------------------------------------*/
+class Solution49 {
+public:
+	vector<vector<string>> groupAnagrams(vector<string>& strs) {
+		vector<vector<string>> res;
+		unordered_map<string, vector<string>*> hash;
+		string key;
+		for (string str : strs)
+		{
+			key = makeKey(str);
+			if (hash.find(key) == hash.end())
+			{
+				hash[key] = new vector<string>;
+			}
+			hash[key]->push_back(str);
+		}
+
+		unordered_map<string, vector<string>*>::iterator it;
+		for (it = hash.begin(); it != hash.end(); it++)
+			res.push_back(*(it->second));
+		return res;
+	}
+
+	string makeKey(string str)
+	{
+		string res = "";
+		int cnt[26] = { 0 };
+		for (int i = 0; i < str.size(); i++)
+			cnt[str[i] - 'a']++;
+		for (int i = 0; i < 26; i++)
+			res += '#' + to_string(cnt[i]);
+
+		return res;
+	}
+};
+
+
+/*-----------------------------------------------------
+	leetcode 887
+------------------------------------------------------*/
+class Solution887 {
+public:
+	int superEggDrop(int K, int N) {
+		return process(K, N);
+	}
+	int process(int curK, int curN)
+	{
+		if (curK == 1 || curN == 1 || curN == 0)
+			return curN;
+
+		int curmin = curN;
+		for (int i = 1; i <= curN; i++)
+			curmin = min(curmin, max(process(--curK, i - 1), process(curK, curN - i)));
+
+		return 1 + curmin;
+	}
+
+	int superEggDrop2(int K, int N)//dp
+	{
+		int** m = new int*[K + 1];
+		for (int i = 0; i <= K; i++)
+			m[i] = new int[N + 1];
+
+		for (int n = 0; n <= N; n++)
+			m[1][n] = n;
+		for (int k = 1; k <= K; k++)
+		{
+			m[k][0] = 0;
+			m[k][1] = 1;
+		}
+		for (int k = 2; k <= K; k++)
+			for (int n = 2; n <= N; n++)
+			{
+				int low = 1;
+				int high = n;
+				int mid = (low + high) / 2;
+				while (low + 1 < high)	//二分查找最小值
+				{
+					mid = (low + high) / 2;
+					int val1 = m[k - 1][mid - 1];
+					int val2 = m[k][n - mid];
+					if (val1 == val2)
+						break;
+					else if (val1 < val2)
+						low = mid;
+					else
+						high = mid;
+				}
+				m[k][n] = max(m[k - 1][mid - 1], m[k][n - mid]) + 1;
+			}
+
+		return m[K][N];
+	}
+};
+
+
+/*-----------------------------------------------------
+	leetcode 50
+------------------------------------------------------*/
+class Solution50 {
+public:
+	double myPow(double x, int n) {
+		double res = 1.0;
+		for (int i = n; i != 0; i /= 2) {
+			if (i % 2 != 0) {
+				res *= x;
+			}
+			x *= x;
+		}
+		return  n < 0 ? 1 / res : res;
+	}
+};
+
+
+/*-----------------------------------------------------
+	leetcode 51
+------------------------------------------------------*/
+class Solution51 {
+public:
+	vector<vector<string>> solveNQueens(int n) {
+		vector<vector<string>> res;
+		vector<string> curRes;
+		vector<int> curIdx;
+		string tmp;
+		for (int i = 0; i < n; i++)
+			tmp += '.';
+		for (int i = 0; i < n; i++)
+			curRes.push_back(tmp);
+		process(n, res, curRes, curIdx);
+		return res;
+	}
+	void process(int n, vector<vector<string>>& res, vector<string>& curRes, vector<int>& curIdx)
+	{
+		int curRow = curIdx.size();
+		if (curRow == n)
+		{
+			res.push_back(curRes);
+			curRes[curRow - 1][curIdx[curRow - 1]] = '.';
+			curIdx.pop_back();
+			return;
+		}
+
+		for (int curCol = 0; curCol < n; curCol++)
+		{
+			if (!check(n, curRes, curRow, curCol))
+				continue;
+			curRes[curRow][curCol] = 'Q';
+			curIdx.push_back(curCol);
+			process(n, res, curRes, curIdx);
+		}
+
+		/*回溯*/
+		if (!curIdx.empty())
+		{
+			curRes[curRow - 1][curIdx[curRow - 1]] = '.';
+			curIdx.pop_back();
+		}
+		return;
+	}
+
+	bool check(int n, vector<string>& curRes, int curRow, int curCol)
+	{
+		/*检查列是否可行*/
+		for (int i = 0; i < curRow; i++)
+			if (curRes[i][curCol] != '.')
+				return false;
+		/*检查左上对角线是否可行*/
+		int i = curRow - 1;
+		int j = curCol - 1;
+		while (i >= 0 && j >= 0)
+		{
+			if (curRes[i][j] != '.')
+				return false;
+			i--;
+			j--;
+		}
+		/*检查右上对角线是否可行*/
+		i = curRow - 1;
+		j = curCol + 1;
+		while (i >= 0 && j <= n - 1)
+		{
+			if (curRes[i][j] != '.')
+				return false;
+			i--;
+			j++;
+		}
+		return true;
+	}
+};
+
+
+/*-----------------------------------------------------
+	字符串分解
+------------------------------------------------------*/
+void StringExpansion()
+{
+	// e3[2[abc]fg]->eabcabcfgabcabcfgabcabcfg
+	while (true)
+	{
+		string str;
+		cin >> str;;
+		stack<char> S;
+		string repeat = "";
+		int times = 0;
+		for (int i = 0; i < str.size(); i++)
+		{
+			times = 0;
+			repeat = "";
+			if (str[i] != ']')
+			{
+				S.push(str[i]);
+			}
+			else
+			{
+				while (S.top() != '[')
+				{
+					repeat = S.top() + repeat;
+					S.pop();
+				}
+				S.pop();
+				times = S.top() - '0';
+				S.pop();
+				for (int j = 0; j < times; j++)
+					for (int k = 0; k < repeat.size(); k++)
+						S.push(repeat[k]);
+			}
+		}
+
+		string res = "";
+		while (!S.empty())
+		{
+			res = S.top() + res;
+			S.pop();
+		}
+		cout << res << endl;
+	}
+}
+
+
+/*-----------------------------------------------------
+	leetcode 52
+------------------------------------------------------*/
+class Solution52 {
+public:
+	int totalNQueens(int n) {
+		int nums = 0;
+		vector<string> curRes;
+		vector<int> curIdx;
+		string tmp;
+		for (int i = 0; i < n; i++)
+			tmp += '.';
+		for (int i = 0; i < n; i++)
+			curRes.push_back(tmp);
+		process(n, nums, curRes, curIdx);
+		return nums;
+	}
+	void process(int n, int& nums, vector<string>& curRes, vector<int>& curIdx)
+	{
+		int curRow = curIdx.size();
+		if (curRow == n)
+		{
+			nums++;;
+			curRes[curRow - 1][curIdx[curRow - 1]] = '.';
+			curIdx.pop_back();
+			return;
+		}
+
+		for (int curCol = 0; curCol < n; curCol++)
+		{
+			if (!check(n, curRes, curRow, curCol))
+				continue;
+			curRes[curRow][curCol] = 'Q';
+			curIdx.push_back(curCol);
+			process(n, nums, curRes, curIdx);
+		}
+
+		/*回溯*/
+		if (!curIdx.empty())
+		{
+			curRes[curRow - 1][curIdx[curRow - 1]] = '.';
+			curIdx.pop_back();
+		}
+		return;
+	}
+
+	bool check(int n, vector<string>& curRes, int curRow, int curCol)
+	{
+		/*检查列是否可行*/
+		for (int i = 0; i < curRow; i++)
+			if (curRes[i][curCol] != '.')
+				return false;
+		/*检查左上对角线是否可行*/
+		int i = curRow - 1;
+		int j = curCol - 1;
+		while (i >= 0 && j >= 0)
+		{
+			if (curRes[i][j] != '.')
+				return false;
+			i--;
+			j--;
+		}
+		/*检查右上对角线是否可行*/
+		i = curRow - 1;
+		j = curCol + 1;
+		while (i >= 0 && j <= n - 1)
+		{
+			if (curRes[i][j] != '.')
+				return false;
+			i--;
+			j++;
+		}
+		return true;
+	}
+};
+
+
+/*-----------------------------------------------------
+	leetcode 53
+------------------------------------------------------*/
+class Solution53 {
+public:
+	int maxSubArray(vector<int>& nums) {
+		int maxSum = INT_MIN;
+		int sum;
+		for (int i = 0; i < nums.size(); i++)
+		{
+			sum = process(nums, i);
+			if (maxSum < sum)
+				maxSum = sum;
+		}
+		return maxSum;
+	}
+	int process(vector<int>& nums, int right)
+	{
+		if (right == 0)
+			return nums[0];
+		return max(nums[right] + process(nums, right - 1), nums[right]);
+	}
+
+	int maxSubArray2(vector<int>& nums)
+	{
+		int maxSum = nums[0];
+		for (int i = 1; i < nums.size(); i++)
+		{
+			nums[i] = max(nums[i], nums[i] + nums[i - 1]);
+			if (maxSum < nums[i])
+				maxSum = nums[i];
+		}
+		return maxSum;
+	}
+
+};
+
+
+/*-----------------------------------------------------
+	leetcode 416
+------------------------------------------------------*/
+class Solution416 {
+public:
+	bool canPartition(vector<int>& nums) {
+		int sum = 0;
+		for (int elem : nums)
+			sum += elem;
+		if (sum % 2 != 0)
+			return false;
+		return process(nums, 0, 0, sum / 2);
+	}
+	bool process(vector<int>& nums, int cur, int target, const int aim)
+	{
+		if (target == aim / 2)
+			return true;
+
+		if (cur == nums.size())
+			return false;
+
+		return process(nums, cur + 1, target + nums[cur], aim) || process(nums, cur + 1, target, aim);
+	}
+
+	bool canPartition2(vector<int>& nums)//dp
+	{
+		int sum = 0;
+		for (int elem : nums)
+			sum += elem;
+
+		if (sum % 2 != 0)
+			return false;
+
+		bool **m = new bool*[nums.size() + 1];
+		for (int i = 0; i <= nums.size(); i++)
+			m[i] = new bool[sum + 1];
+
+		for (int target = 0; target <= sum; target++)
+			m[nums.size()][target] = (target == sum / 2);
+
+		for (int cur = nums.size() - 1; cur >= 0; cur--)
+			for (int target = 0; target <= sum; target++)
+				m[cur][target] = m[cur + 1][target + nums[cur]] || m[cur + 1][target];
+		return m[0][0];
+	}
+
+	bool canPartition3(vector<int>& nums)//二维改一维，更新一行时直接覆盖上一行
+	{
+		int sum = 0;
+		for (int elem : nums)
+			sum += elem;
+
+		if (sum % 2 != 0)
+			return false;
+
+		bool *m = new bool[sum / 2 + 1];
+
+		for (int target = 0; target <= sum; target++)
+			m[target] = (target == sum / 2);
+
+		for (int cur = nums.size() - 1; cur >= 0; cur--)
+			for (int target = 0; target <= sum / 2; target++)
+			{
+				m[target] = m[target + nums[cur]] || m[target];
+				if (m[target])
+					return true;
+			}
+		return m[0];
+	}
+};
+
+
+/*-----------------------------------------------------
+	leetcode 322
+------------------------------------------------------*/
+class Solution322 {
+public:
+	int coinChange(vector<int>& coins, int amount) {
+		int minval = process(coins, coins.size() - 1, amount);
+		if (minval == INT_MAX)
+			return -1;
+		return minval;
+	}
+	int process(vector<int>& coins, int cur, int amount)
+	{
+		if (amount == 0)
+			return 0;
+		if (cur < 0 || amount < 0)
+			return INT_MAX;
+
+		int minval = process(coins, cur - 1, amount);
+		if (amount - coins[cur] >= 0)
+		{
+			int val = process(coins, cur, amount - coins[cur]);
+			if (val == INT_MAX)
+				val -= 1;
+			minval = min(val + 1, minval);
+			val = process(coins, cur - 1, amount - coins[cur]);
+			if (val == INT_MAX)
+				val -= 1;
+			minval = min(val + 1, minval);
+		}
+		return minval;
+	}
+
+	int coinChange2(vector<int>& coins, int amount)
+	{
+		int **m = new int*[coins.size() + 1];
+		for (int i = 0; i < coins.size() + 1; i++)
+			m[i] = new int[amount + 1];
+		for (int target = 0; target <= amount; target++)
+			m[0][target] = INT_MAX;
+		for (int cur = 0; cur <= coins.size(); cur++)
+			m[cur][0] = 0;
+
+		int val;
+		for (int cur = 1; cur <= coins.size(); cur++)
+			for (int target = 1; target <= amount; target++)
+			{
+				if (cur == 3 && target == 1)
+					cout << "";
+				m[cur][target] = m[cur - 1][target];
+				if (target - coins[cur - 1] >= 0)
+				{
+					val = m[cur][target - coins[cur - 1]];
+					if (val == INT_MAX)
+						val -= 1;
+					m[cur][target] = min(m[cur][target], val + 1);
+					val = m[cur - 1][target - coins[cur - 1]];
+					if (val == INT_MAX)
+						val -= 1;
+					m[cur][target] = min(m[cur][target], val + 1);
+				}
+			}
+		return m[coins.size()][amount] == INT_MAX ? -1 : m[coins.size()][amount];
+	}
+};
+
+
+/*-----------------------------------------------------
+	leetcode 54
+------------------------------------------------------*/
+class Solution54 {
+public:
+	vector<int> spiralOrder(vector<vector<int>>& matrix) {
+		vector<int> res;
+		if (matrix.empty())
+			return res;
+		int x1 = 0;
+		int y1 = 0;
+		int x2 = matrix.size() - 1;
+		int y2 = matrix[0].size() - 1;
+		while (x1 <= x2 && y1 <= y2)
+		{
+			process(matrix, res, x1, y1, x2, y2);
+			x1++; y1++;
+			x2--; y2--;
+		}
+		return res;
+	}
+	void process(const vector<vector<int>>& m, vector<int>& res, int x1, int y1, int x2, int y2)
+	{
+
+		if (x1 == x2 && y1 == y2)
+			res.push_back(m[x1][x2]);
+		else if (x1 == x2)
+			for (int i = y1; i <= y2; i++)
+				res.push_back(m[x1][i]);
+		else if (y1 == y2)
+			for (int i = x1; i <= x2; i++)
+				res.push_back(m[i][y1]);
+		else
+		{
+			int cnt = 0;
+			int curx = x1;
+			int cury = y1;
+			while (cnt < 2 * (x2 - x1 + y2 - y1))
+			{
+				res.push_back(m[curx][cury]);
+				cnt++;
+				if (curx == x1 && cury != y2)
+					cury++;
+				else if (curx != x2 && cury == y2)
+					curx++;
+				else if (curx == x2 && cury != y1)
+					cury--;
+				else
+					curx--;
+			}
+		}
+	}
+};
+
+
+/*-----------------------------------------------------
+	leetcode 56
+------------------------------------------------------*/
+struct Interval {
+	int start;
+	int end;
+	Interval() : start(0), end(0) {}
+	Interval(int s, int e) : start(s), end(e) {}
+};
+bool operator < (Interval a, Interval b)
+{
+	return a.start < b.start;
+}
+class Solution56 {
+public:
+
+	vector<Interval> merge(vector<Interval>& intervals) {
+		vector<Interval> res;
+		sort(intervals.begin(), intervals.end());
+		for (int i = 0; i < intervals.size(); i++)
+		{
+			if (i == intervals.size() - 1)
+			{
+				res.push_back(intervals[i]);
+				break;
+			}
+			if (intervals[i].start == intervals[i + 1].start)
+				intervals[i + 1].end = max(intervals[i].end, intervals[i + 1].end);
+			else if (intervals[i].end >= intervals[i + 1].start)
+			{
+				intervals[i + 1].start = intervals[i].start;
+				intervals[i + 1].end = max(intervals[i].end, intervals[i + 1].end);
+			}
+			else
+				res.push_back(intervals[i]);
+		}
+		return res;
+	}
+};
+
+
+/*-----------------------------------------------------
+	leetcode 58
+------------------------------------------------------*/
+class Solution58 {
+public:
+	int lengthOfLastWord(string s) {
+		if (s.empty())
+			return 0;
+		int i = s.size() - 1;
+		while (i >= 0 && s[i] == ' ')
+			i--;
+		int cnt = 0;
+		while (i >= 0 && s[i] != ' ')
+		{
+			i--;
+			cnt++;
+		}
+		return cnt;
+	}
+};
+
+
+/*-----------------------------------------------------
+	leetcode 59
+------------------------------------------------------*/
+class Solution59 {
+public:
+	vector<vector<int>> generateMatrix(int n) {
+		vector<vector<int>> m(n, vector<int>(n));
+		int x1 = 0;
+		int y1 = 0;
+		int x2 = n - 1;
+		int y2 = n - 1;
+		int last = 0;
+		while (x1 <= x2)
+			last = process(m, x1++, y1++, x2--, y2--, last);
+		return m;
+	}
+	int process(vector<vector<int>>& m, int x1, int y1, int x2, int y2, int last)
+	{
+		if (x1 == x2)
+		{
+			m[x1][y1] = ++last;
+			return last;
+		}
+		int curx = x1;
+		int cury = y1;
+		int cnt = 0;
+		while (cnt < 2 * (x2 - x1 + y2 - y1))
+		{
+			m[curx][cury] = ++last;
+			if (curx == x1 && cury != y2)
+				cury++;
+			else if (cury == y2 && curx != x2)
+				curx++;
+			else if (curx == x2 && cury != y1)
+				cury--;
+			else
+				curx--;
+			cnt++;
+		}
+		return last;
+	}
+
+};
+
+
+/*-----------------------------------------------------
+	leetcode 60
+------------------------------------------------------*/
+class Solution60 {
+public:
+	string getPermutation(int n, int k) {
+		int factorial = 1;
+		int preNum = 2;
+		for (; k >= factorial; preNum++)
+			factorial *= preNum;
+		factorial /= (preNum - 1);
+		preNum -= 2;
+		int times = k - factorial;
+
+		string res = "";
+		for (int i = n; i > n - preNum; i--)
+		{
+			char c = '0' + i;
+			res += c;
+		}
+		for (int i = n - preNum; i >= 1; i--)
+		{
+			char c = '0' + i;
+			res = c + res;
+		}
+
+		for (int i = 0; i < times; i++)
+			nxtBigger(res);
+
+		return res;
+	}
+
+	void nxtBigger(string& res)
+	{
+		int i = res.size() - 2;
+		for (; i >= 0; i--)
+			if (res[i] < res[i + 1])
+				break;
+
+		int j = i + 1;
+		for (int k = j + 1; k < res.size(); k++)
+		{
+			if (res[k] > res[i] && res[k] < res[j])
+				j = k;
+			if (res[k] == res[i] + 1)
+				break;
+		}
+
+		swap(res[i], res[j]);
+		reverse(res, i + 1);
+	}
+
+	void reverse(string& str, int start)
+	{
+		int end = str.size() - 1;
+		while (start < end)
+			swap(str[start++], str[end--]);
+	}
+};
+
+
+/*-----------------------------------------------------
+	leetcode 61
+------------------------------------------------------*/
+struct ListNode61 {
+	int val;
+	ListNode61 *next;
+	ListNode61(int x) : val(x), next(NULL) {}
+};
+class Solution61 {
+	/*
+	旋转k步，则forward指针先走k-1步，back再随之一起走,
+	当forward到达最后一个节点时，back到达新的首节点，
+	若forward先走k步，则back指向新的尾节点。
+	*/
+public:
+	ListNode61* rotateRight(ListNode61* head, int k) {
+		if (!head)
+			return NULL;
+		ListNode61* forward = head;
+		ListNode61* back = head;
+		ListNode61* tail = NULL;
+		for (int i = 0; i < k; i++)
+		{
+			if (!forward->next)
+			{
+				tail = forward;
+				tail->next = head;
+				k = k % (i + 1);
+				i = -1;
+			}
+			forward = forward->next;
+		}
+		while (forward->next && forward != tail)
+		{
+			forward = forward->next;
+			back = back->next;
+		}
+		forward->next = head;
+		forward = back->next;
+		back->next = NULL;
+		return forward;
+	}
+};
+
+
+/*-----------------------------------------------------
+	leetcode 62
+------------------------------------------------------*/
+class Solution62 {
+public:
+	int uniquePaths(int m, int n) {
+		return process(0, 0, m, n);
+	}
+	int process(int x, int y, int m, int n)
+	{
+		if (y == m - 1 && x == n - 1)
+			return 1;
+
+		if (y == m - 1)
+			return process(x + 1, y, m, n);
+
+		if (x == n - 1)
+			return process(x, y + 1, m, n);
+
+		return process(x, y + 1, m, n) + process(x + 1, y, m, n);
+	}
+
+	int uniquePaths2(int m, int n)
+	{
+		vector<vector<int>> dp(m, vector<int>(n));
+		dp[m - 1][n - 1] = 1;
+		for (int x = n - 2; x >= 0; x--)
+			dp[m - 1][x] = dp[m - 1][x + 1];
+		for (int y = m - 2; y >= 0; y--)
+			dp[y][n - 1] = dp[y + 1][n - 1];
+
+		for (int y = m - 2; y >= 0; y--)
+			for (int x = n - 2; x >= 0; x--)
+				dp[y][x] = dp[y + 1][x] + dp[y][x + 1];
+
+		return dp[0][0];
+	}
+};
+
+
+/*-----------------------------------------------------
+	leetcode 63
+------------------------------------------------------*/
+class Solution63 {
+public:
+	int uniquePathsWithObstacles(vector<vector<int>>& obstacleGrid) {
+		return process(obstacleGrid, 0, 0);
+	}
+	int process(vector<vector<int>>& grid, int y, int x)
+	{
+		int height = grid.size();
+		int width = grid[0].size();
+
+		if (y == height - 1 && x == width - 1)
+			return 1;
+
+		if (grid[y][x] == 1)
+			return 0;
+
+		if (y == height - 1)
+			return process(grid, y, x + 1);
+
+		if (x == width - 1)
+			return process(grid, y + 1, x);
+
+		return process(grid, y, x + 1) + process(grid, y + 1, x);
+	}
+
+	long uniquePathsWithObstacles2(vector<vector<int>>& obstacleGrid)
+	{
+		int height = obstacleGrid.size();
+		int width = obstacleGrid[0].size();
+		if (obstacleGrid[height - 1][width - 1] == 0)
+			return 0;
+		vector<vector<long>> dp(height, vector<long>(width));
+
+		for (int y = height - 1; y >= 0; y--)
+			for (int x = width - 1; x >= 0; x--)
+			{
+				if (x == width - 1 && y == height - 1)
+					dp[y][x] = 1;
+				else if (obstacleGrid[y][x] == 1)
+					dp[y][x] = 0;
+				else if (y == height - 1)
+					dp[y][x] = dp[y][x + 1];
+				else if (x == width - 1)
+					dp[y][x] = dp[y + 1][x];
+				else
+					dp[y][x] = dp[y + 1][x] + dp[y][x + 1];
+			}
+
+		return dp[0][0];
+	}
+};
+
+
+/*-----------------------------------------------------
+	leetcode 64
+------------------------------------------------------*/
+class Solution64 {
+public:
+	int minPathSum(vector<vector<int>>& grid) {
+		int height = grid.size();
+		int width = grid[0].size();
+		return process(grid, 0, 0, height, width);
+	}
+	int process(vector<vector<int>>& grid, int y, int x, int height, int width)
+	{
+		if (y == height - 1 && x == width - 1)
+			return grid[y][x];
+
+		if (y == height - 1)
+			return process(grid, y, x + 1, height, width) + grid[y][x];
+
+		if (x == width - 1)
+			return process(grid, y + 1, x, height, width) + grid[y][x];
+
+		return min(process(grid, y, x + 1, height, width) + grid[y][x + 1], process(grid, y + 1, x, height, width) + grid[y + 1][x]);
+	}
+
+	int minPathSum2(vector<vector<int>>& grid)
+	{
+		int height = grid.size();
+		int width = grid[0].size();
+		vector<vector<int>> dp(height, vector<int>(width));
+
+		dp[height - 1][width - 1] = grid[height - 1][width - 1];
+		for (int y = height - 2; y >= 0; y--)
+			dp[y][width - 1] = dp[y + 1][width - 1] + grid[y][width - 1];
+		for (int x = width - 2; x >= 0; x--)
+			dp[height - 1][x] = dp[height - 1][x + 1] + grid[height - 1][x];
+
+		for (int y = height - 2; y >= 0; y--)
+			for (int x = width - 2; x >= 0; x--)
+				dp[y][x] = min(dp[y + 1][x], dp[y][x + 1]) + grid[y][x];
+
+		return dp[0][0];
+	}
+};
 
 
 
 
 
-
-
+/*bishi start*/
 
 /*------------------------------------------------------
 在数轴上x=0的位置上有一只青蛙，它的家在x=n的位置。
