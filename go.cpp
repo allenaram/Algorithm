@@ -3753,7 +3753,14 @@ public:
 
 
 /*-----------------------------------------------------
-	leetcode 31
+leetcode 31
+思路： 
+1、从右往左把第一个能左移的数左移
+2、重新排列右边
+方法：
+1、从右到左找到第一个右边大于左边的数，交换
+2、把右移的数插入右边序列（因为右边序列一定是递减的）
+3、反转右边序列
 ------------------------------------------------------*/
 class Solution31 {
 public:
@@ -3782,6 +3789,7 @@ public:
 		}
 	}
 };
+
 
 
 /*-----------------------------------------------------
@@ -7273,7 +7281,341 @@ public:
 };
 
 
+/*----------------------------------------
+		leetcode 127
+ ---------------------------------------*/
+class Solution127 {
+public:
+	/*暴力递归，会超时*/
+	int ladderLength(string beginWord, string endWord, vector<string>& wordList) {
+		unordered_map<string, bool>* hm = new unordered_map<string, bool>();
+		for (auto elem : wordList)
+		{
+			hm->insert(pair<string, bool>(elem, false));
+		}
 
+		(*hm)[beginWord] = true;
+		int res = process(beginWord, endWord, hm);
+		return res == INT_MAX ? 0 : res;
+	}
+
+	bool canTransform(string left, string right)
+	{
+		int cnt = 0;
+		for (int i = 0; i < min(left.size(), right.size()); ++i)
+		{
+			if (left[i] != right[i])
+				cnt++;
+		}
+		return cnt == 1;
+	}
+
+	int process(string cur, string& tar, unordered_map<string, bool>* hm)
+	{
+		if (cur == tar)
+			return 1;
+
+		int minStep = INT_MAX;
+		for (unordered_map<string, bool>::iterator iter = hm->begin(); iter != hm->end(); ++iter)
+		{
+			if (iter->second)
+				continue;
+			if (canTransform(cur, iter->first))
+			{
+				iter->second = true;
+				int forward = process(iter->first, tar, hm);
+				minStep = min(minStep, forward == INT_MAX ? INT_MAX : forward + 1);
+				iter->second = false;
+			}
+		}
+		return minStep;
+	}
+
+	void createMap(vector<string>& wordList, string beginWord)
+	{
+		bool concludeBeginWord = false;
+		for (string elem : wordList)
+			if (elem == beginWord)
+			{
+				concludeBeginWord = true;
+				break;
+			}
+		if (!concludeBeginWord)
+			wordList.push_back(beginWord);
+		for (int i = 0; i < wordList.size(); i++)
+		{
+			vector<int> line = vector<int>(wordList.size(), INT_MAX);
+			_g.push_back(line);
+			_map[wordList[i]] = i;
+		}
+
+		for (int i = 0; i < wordList.size(); i++)
+		{
+			for (int j = 0; j < wordList.size(); j++)
+			{
+				if (i == j)
+					_g[i][j] = 0;
+				else if (canTransform(wordList[i], wordList[j]))
+				{
+					_g[i][j] = 1;
+					_g[j][i] = 1;
+				}
+			}
+		}
+
+	}
+
+	/*图论最短路径方法，用的dijkstra，由于是无权图，其实用普通BFS就行*/
+	int ladderLength2(string beginWord, string endWord, vector<string>& wordList)
+	{
+		/*构建图*/
+		createMap(wordList, beginWord);
+		if (_map.find(endWord) == _map.end())
+			return 0;
+		int startI = _map[beginWord];
+		int endI = _map[endWord];
+		vector<bool> isMin = vector<bool>(wordList.size(), false);
+		isMin[startI] = true;
+		for (int i = 0; i < wordList.size() - 1; i++)
+		{
+			int minD = INT_MAX;
+			int minI = -1;
+			for (int j = 0; j < wordList.size(); j++)
+			{
+				if (isMin[j])
+					continue;
+				if (_g[startI][j] <= minD)
+				{
+					minD = _g[startI][j];
+					minI = j;
+				}
+			}
+			isMin[minI] = true;
+			if (minI == endI)
+				return _g[startI][endI] == INT_MAX ? 0 : _g[startI][endI] + 1;
+			else
+			{
+				if (minD == INT_MAX)
+					return 0;
+				for (int j = 0; j < wordList.size(); ++j)
+				{
+					if (isMin[j])
+						continue;
+					_g[startI][j] = min(_g[startI][j], _g[minI][j] == INT_MAX ? INT_MAX : minD + _g[minI][j]);
+				}
+			}
+		}
+
+		return -1;
+	}
+
+
+	void addAuxPoint(string word, unordered_map<string, list<string>>& auxMap)
+	{
+		for (int i = 0; i < word.size(); ++i)
+		{
+			string aux = word.substr(0, i) + '*' + word.substr(i + 1);
+			if (auxMap.find(aux) == auxMap.end())
+				auxMap[aux] = list<string>();
+			auxMap[aux].push_back(word);
+		}
+		
+	}
+
+	void addLink(string word, unordered_map<string, unordered_set<string>>& map, unordered_map<string, list<string>>& auxMap)
+	{
+		if (map.find(word) != map.end())
+			return;
+
+		for (int i = 0; i < word.size(); ++i)
+		{
+			string aux = word.substr(0, i) + '*' + word.substr(i + 1);
+			for (string s : auxMap[aux])
+				if (s!=word)
+					map[word].insert(s);
+		}
+	}
+
+	/*加入辅助结点，大大减少构建图的时间*/
+	int ladderLength3(string beginWord, string endWord, vector<string>& wordList)
+	{
+		bool flag = false;
+		for (string s : wordList)
+			if (s == endWord)
+				flag = true;
+		if (!flag)
+			return 0;
+
+		//create map with aux point
+		unordered_map<string, list<string>> auxMap;
+		addAuxPoint(beginWord, auxMap);
+		addAuxPoint(endWord, auxMap);
+		for (string elem : wordList)
+			addAuxPoint(elem, auxMap);
+
+		unordered_map<string, unordered_set<string>> map;
+		addLink(beginWord, map, auxMap);
+		addLink(endWord, map, auxMap);
+		for (string elem : wordList)
+			addLink(elem, map, auxMap);
+
+		//BFS
+		unordered_set<string> visited;
+		visited.insert(beginWord);
+		queue<string> q;
+		q.push(beginWord);
+		int distance = 1;
+		int curCnt = 1;
+		int nxtCnt = 0;
+		while (!q.empty())
+		{
+			string cur = q.front();
+			q.pop();
+			curCnt--;
+			cout << cur << " : " << distance << endl;
+			for (string s : map[cur])
+			{
+				if (s == endWord)
+					return distance+1;
+				if (visited.find(s) != visited.end())
+					continue;
+				q.push(s);
+				visited.insert(s);
+				nxtCnt++;
+			}
+			if (curCnt == 0)
+			{
+				curCnt = nxtCnt;
+				nxtCnt = 0;
+				distance++;
+			}
+		}
+		return 0;
+
+	}
+
+
+private:
+	vector<vector<int>> _g;
+	unordered_map<string, int> _map;
+
+};
+
+
+/*----------------------------------------
+		leetcode 129
+ ---------------------------------------*/
+struct TreeNode
+{
+	int val;
+	TreeNode* left;
+	TreeNode* right;
+	TreeNode(int x) : val(x), left(NULL), right(NULL) {}
+};
+class Solution129 {
+public:
+	int sumNumbers(TreeNode* root) {
+		if (root == NULL)
+			return 0;
+		int sum = 0;
+		process(root, sum, 0);
+		return sum;
+	}
+	void process(TreeNode* cur, int& sum, int curVal)
+	{
+		if (cur == NULL)
+			return;
+		else
+			curVal += cur->val;
+		if (cur->left == NULL && cur->right == NULL)
+		{
+			sum += curVal;
+			return;
+		}
+		process(cur->left, sum, 10 * curVal);
+		process(cur->right, sum, 10 * curVal);
+	}
+};
+
+
+/*----------------------------------------
+		leetcode 130
+ ---------------------------------------*/
+class Solution130 {
+public:
+	void solve(vector<vector<char>>& board) {
+		unordered_set<char*> checkedList;
+		for (int i = 0; i<board.size(); i++)
+			for (int j = 0; j < board[0].size(); j++)
+			{
+				bool isSurrounded = true;
+				if (board[i][j] == 'O' && checkedList.find(&board[i][j])==checkedList.end())
+				{
+					unordered_set<char*> curGroup;
+					queue<pair<int, int>> q;
+					q.push(pair<int, int>(i, j));
+					while (!q.empty())
+					{
+						pair<int, int> curIdx = q.front();
+						q.pop();
+						curGroup.insert(&board[i][j]);
+						checkedList.insert(&board[i][j]);
+						if (isSurrounded && checkEdge(board.size(), board[0].size(), pair<int, int>(curIdx.first, curIdx.second)))
+							isSurrounded = false;
+						
+						if (curIdx.first > 0 && board[curIdx.first - 1][curIdx.second] == 'O' && curGroup.find(&board[curIdx.first - 1][curIdx.second]) == curGroup.end())
+						{
+							curGroup.insert(&board[curIdx.first - 1][curIdx.second]);
+							q.push(pair<int, int>(curIdx.first - 1, curIdx.second));
+						}
+						if (curIdx.first < board.size()-1 && board[curIdx.first + 1][curIdx.second] == 'O' && curGroup.find(&board[curIdx.first + 1][curIdx.second]) == curGroup.end())
+						{
+							curGroup.insert(&board[curIdx.first + 1][curIdx.second]);
+							q.push(pair<int, int>(curIdx.first + 1, curIdx.second));
+						}
+						if (curIdx.second > 0 && board[curIdx.first][curIdx.second-1] == 'O' && curGroup.find(&board[curIdx.first][curIdx.second-1]) == curGroup.end())
+						{
+							curGroup.insert(&board[curIdx.first][curIdx.second-1]);
+							q.push(pair<int, int>(curIdx.first, curIdx.second-1));
+						}
+						if (curIdx.second <board[0].size()-1 && board[curIdx.first][curIdx.second + 1] == 'O' && curGroup.find(&board[curIdx.first][curIdx.second + 1]) == curGroup.end())
+						{
+							curGroup.insert(&board[curIdx.first][curIdx.second + 1]);
+							q.push(pair<int, int>(curIdx.first, curIdx.second + 1));
+						}
+					}
+
+					if (isSurrounded)
+					{
+						for (auto iter = curGroup.begin(); iter != curGroup.end(); iter++)
+							**iter = 'X';
+					}
+					curGroup.clear();
+					
+				}
+			}
+
+		
+		
+	}
+
+private:
+	bool checkEdge(int height, int width, pair<int, int> cur)
+	{
+		return cur.first == 0 || cur.first == height - 1 || cur.second == 0 || cur.second == width - 1;
+	}
+};
+
+
+/*----------------------------------------
+		leetcode 131
+ ---------------------------------------*/
+class Solution131 {
+public:
+	vector<vector<string>> partition(string s) {
+
+	}
+};
 
 
 
@@ -7316,6 +7658,7 @@ public:
 
 int main()
 {
+
 
 	
 	return 0;
