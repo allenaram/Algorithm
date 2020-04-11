@@ -7613,7 +7613,55 @@ private:
 class Solution131 {
 public:
 	vector<vector<string>> partition(string s) {
+		/*找出所有回文子串*/
+		vector<vector<int>> palindrome = vector<vector<int>>(s.size(), vector<int>());//记录所有的回文串，palindrome[i]表示所有以s[i]开头的串的长度集合
+		for (int i = 0; i < s.size(); ++i)//检查以s[i]为中心的奇数长度串
+		{
+			palindrome[i].push_back(1);
+			int expand = 1;
+			while (i + expand <= s.size() - 1 && i - expand >= 0 && s[i - expand] == s[i + expand])
+			{
+				palindrome[i - expand].push_back(2 * expand + 1);
+				expand++;
+			}
+		}
+		if (s.size()>1)
+			for (int i = 0; i < s.size() - 1; ++i)//检查以s[i]和s[i+1]为中心的奇数长度串
+			{
+				if (s[i] == s[i + 1])
+				{
+					palindrome[i].push_back(2);
+					int expand = 1;
+					while (i+1 + expand <= s.size() - 1 && i - expand >= 0 && s[i - expand] == s[i+1 + expand])
+					{
+						palindrome[i - expand].push_back(2 * expand + 2);
+						expand++;
+					}
+				}
+			}
+		/*用回文子串组成原串*/
+		vector<vector<string>> res;
+		vector<string> cur;
+		process(s, palindrome, cur, 0, res);
 
+		return s.empty() ? vector<vector<string>>() : res;
+	}
+
+private:
+	void process(string& s, const vector<vector<int>>& palindrome, vector<string>& cur, int curi, vector<vector<string>>& res)
+	{
+		if (curi == s.size())
+		{
+			res.push_back(cur);
+			return;
+		}
+
+		for (int i = 0; i < palindrome[curi].size(); ++i)
+		{
+			cur.push_back(s.substr(curi, palindrome[curi][i]));
+			process(s, palindrome, cur, curi + palindrome[curi][i], res);
+			cur.pop_back();
+		}
 	}
 };
 
@@ -7658,7 +7706,8 @@ public:
 
 int main()
 {
-
+	Solution131 s;
+	s.partition("a");
 
 	
 	return 0;
