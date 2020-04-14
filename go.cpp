@@ -7718,6 +7718,76 @@ public:
 };
 
 
+/*----------------------------------------
+		leetcode 134
+ ---------------------------------------*/
+class Solution134 {
+public:
+	int canCompleteCircuit(vector<int>& gas, vector<int>& cost) {
+		/*-------------------------------------------------
+		思路：原本需要O(n^2)复杂度遍历每种情况，
+		可以优化成只需要O(n)一次遍历，依据为：
+		从A站到不了B站，则A~B之间的任意一站都到不了B站
+		-------------------------------------------------*/
+		int start = 0;
+		int cur = 1;
+		int totalTank = 0;
+		int curTank = 0;
+		bool canReach = true;
+		while (cur != start+gas.size()+1)
+		{
+			int last = (cur - 1 + gas.size()) % gas.size();
+			curTank += (gas[last] - cost[last]);
+			totalTank += (gas[last] - cost[last]);
+			if (curTank < 0)
+			{
+				curTank = 0;
+				totalTank = 0;
+				start = cur % gas.size();
+				canReach = false;
+			}
+			else
+				canReach = true;
+
+			cur++;
+		}
+
+		return canReach ? start : -1;
+	}
+};
+
+
+/*----------------------------------------
+		leetcode 136
+ ---------------------------------------*/
+class Solution136 {
+public:
+	int singleNumber(vector<int>& nums) {
+		int XOR = 0;
+		bool isFirst = true;
+		for (int item : nums)
+		{
+			XOR = isFirst ? item : XOR ^ item;
+			isFirst = false;
+		}
+		return XOR;
+	}
+};
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 /*bishi start*/
 
@@ -7758,20 +7828,9 @@ public:
 
 int main()
 {
-	Solution133 s;
+	Solution136 s;
+	vector<int> i = vector<int>({ 2,2,1 });
+	s.singleNumber(i);
 	
-	Node133* n1 = new Node133(1);
-	Node133* n2 = new Node133(2);
-	Node133* n3 = new Node133(3);
-	Node133* n4 = new Node133(4);
-	n1->neighbors.push_back(n2);
-	n1->neighbors.push_back(n4);
-	n2->neighbors.push_back(n1);
-	n2->neighbors.push_back(n3);
-	n3->neighbors.push_back(n2);
-	n3->neighbors.push_back(n4);
-	n4->neighbors.push_back(n1);
-	n4->neighbors.push_back(n3);
-	Node133* ret = s.cloneGraph(n1);
 	return 0;
 }
