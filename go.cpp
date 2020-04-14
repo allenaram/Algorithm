@@ -7666,6 +7666,58 @@ private:
 };
 
 
+/*----------------------------------------
+		leetcode 133
+ ---------------------------------------*/
+class Node133 {
+public:
+	int val;
+	vector<Node133*> neighbors;
+
+	Node133() {
+		val = 0;
+		neighbors = vector<Node133*>();
+	}
+
+	Node133(int _val) {
+		val = _val;
+		neighbors = vector<Node133*>();
+	}
+
+	Node133(int _val, vector<Node133*> _neighbors) {
+		val = _val;
+		val = _val;
+		neighbors = _neighbors;
+	}
+};
+class Solution133 {
+public:
+	Node133* cloneGraph(Node133* node) {
+		if (node == NULL)
+			return NULL;
+		unordered_map<Node133*, Node133*> map;
+		stack<Node133*> s;
+		s.push(node);
+		while (!s.empty())
+		{
+			Node133* cur = s.top();
+			s.pop();
+			Node133* cloneNode = new Node133(cur->val);
+			map[cur] = cloneNode;
+			for (Node133* neighbor : cur->neighbors)
+				if (map.find(neighbor) == map.end())
+					s.push(neighbor);
+		}
+
+		for (auto iter = map.begin(); iter != map.end(); ++iter)
+			for (Node133* neighbor : iter->first->neighbors)
+				iter->second->neighbors.push_back(map[neighbor]);
+
+		return map[node];
+	}
+};
+
+
 
 /*bishi start*/
 
@@ -7706,9 +7758,20 @@ public:
 
 int main()
 {
-	Solution131 s;
-	s.partition("a");
-
+	Solution133 s;
 	
+	Node133* n1 = new Node133(1);
+	Node133* n2 = new Node133(2);
+	Node133* n3 = new Node133(3);
+	Node133* n4 = new Node133(4);
+	n1->neighbors.push_back(n2);
+	n1->neighbors.push_back(n4);
+	n2->neighbors.push_back(n1);
+	n2->neighbors.push_back(n3);
+	n3->neighbors.push_back(n2);
+	n3->neighbors.push_back(n4);
+	n4->neighbors.push_back(n1);
+	n4->neighbors.push_back(n3);
+	Node133* ret = s.cloneGraph(n1);
 	return 0;
 }
