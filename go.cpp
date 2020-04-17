@@ -7764,24 +7764,77 @@ class Solution136 {
 public:
 	int singleNumber(vector<int>& nums) {
 		int XOR = 0;
-		bool isFirst = true;
 		for (int item : nums)
-		{
-			XOR = isFirst ? item : XOR ^ item;
-			isFirst = false;
-		}
+			XOR = XOR ^ item;
 		return XOR;
 	}
 };
 
 
+/*----------------------------------------
+		leetcode 137
+ ---------------------------------------*/
+class Solution137 {
+public:
+	int singleNumber(vector<int>& nums) {
+		int once = 0;
+		int twice = 0;
+		for (int elem : nums)
+		{
+			once = ~twice & (once ^ elem);	//已经出现两次时，无条件置0；已经出现过一次时，1变0；没出现过时，0变1
+			twice = ~once & (twice ^ elem); //当前是第一次，无条件置0；当前是第二次，0变1；当前是第三次，1变0
+		}
+
+		return once;
+	}
+};
 
 
+/*----------------------------------------
+		leetcode 138
+ ---------------------------------------*/
+class Node138 {
+public:
+	int val;
+	Node138* next;
+	Node138* random;
 
+	Node138(int _val) {
+		val = _val;
+		next = NULL;
+		random = NULL;
+	}
+};
+class Solution138 {
+public:
+	Node138* copyRandomList(Node138* head) {
+		Node138* cur = head;
+		while (cur)
+		{
+			Node138* newNode = new Node138(cur->val);
+			newNode->next = cur->next;
+			cur->next = newNode;
+			cur = newNode->next;
+		}
+		cur = head;
+		while (cur)
+		{
+			cur->next->random = cur->random ? cur->random->next : NULL;
+			cur = cur->next->next;
+		}
+		cur = head;
+		Node138* ret = head ? head->next : NULL;
+		while (cur)
+		{
+			Node138* tmp = cur->next;
+			cur->next = tmp->next;
+			cur = cur->next;
+			tmp->next = cur ? cur->next : NULL;
+		}
 
-
-
-
+		return ret;
+	}
+};
 
 
 
@@ -7828,9 +7881,15 @@ public:
 
 int main()
 {
-	Solution136 s;
-	vector<int> i = vector<int>({ 2,2,1 });
-	s.singleNumber(i);
-	
+	Solution138 s;
+	Node138* n1 = new Node138(1);
+	Node138* n2 = new Node138(2);
+	Node138* n3 = new Node138(3);
+	n1->next = n2;
+	n2->next = n3;
+	n1->random = n3;
+	n2->random = n2;
+	n3->random = n1;
+	Node138* ret = s.copyRandomList(n1);
 	return 0;
 }
