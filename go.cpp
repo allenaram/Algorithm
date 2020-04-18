@@ -7837,6 +7837,140 @@ public:
 };
 
 
+/*----------------------------------------
+		leetcode 139
+ ---------------------------------------*/
+class Solution139 {
+public:
+	/*带记忆的递归*/
+	bool wordBreak(string s, vector<string>& wordDict) {
+		unordered_set<string> dict;
+		for (string elem : wordDict)
+			dict.insert(elem);
+
+		vector<bool> canDivide = vector<bool>(s.size(), true);
+		return process(s, 0, dict, canDivide);
+	}
+
+	/*DP*/
+	bool wordBreak2(string s, vector<string>& wordDict) {
+		unordered_set<string> dict;
+		for (string elem : wordDict)
+			dict.insert(elem);
+		
+		vector<bool> dp = vector<bool>(s.size() + 1, false);
+		dp[s.size()] = true;
+		for (int i = dp.size() - 2; i >= 0; --i)
+			for (int j = i + 1; j < dp.size(); ++j)
+				if (dict.find(s.substr(i, j - i)) != dict.end() && dp[j])
+				{
+					dp[i] = true;
+					break;
+				}
+		return dp[0];
+	}
+private:
+	bool process(string& s, int left, unordered_set<string>& dict, vector<bool>& canDivide)
+	{
+		if (left == s.size())
+			return true;
+
+		for (int i = left; i < s.size(); ++i)
+		{
+			if (dict.find(s.substr(left, i - left + 1)) == dict.end())
+				continue;
+			if (!canDivide[i + 1])
+				continue;
+			if (process(s, i + 1, dict, canDivide))
+				return true;
+		}
+		canDivide[left] = false;
+		return false;
+	}
+};
+
+
+/*----------------------------------------
+		leetcode 141
+ ---------------------------------------*/
+struct ListNode141 {
+	int val;
+	ListNode141* next;
+	ListNode141(int x) : val(x), next(NULL) {}
+};
+class Solution141 {
+public:
+	bool hasCycle(ListNode141* head) {
+		ListNode141* fast = head;
+		ListNode141* slow = head;
+		while (fast != NULL && fast->next != NULL)
+		{
+			fast = fast->next->next;
+			slow = slow->next;
+			if (fast == slow)
+				return true;
+		}
+		return false;
+	}
+};
+
+
+/*----------------------------------------
+		leetcode 142
+ ---------------------------------------*/
+struct ListNode142 {
+	int val;
+	ListNode142* next;
+	ListNode142(int x) : val(x), next(NULL) {}
+};
+class Solution142 {
+public:
+	ListNode142* detectCycle(ListNode142* head) {
+		/*————————————————
+		思路：
+			1、计算环上结点数量n；
+			2、forward指针先行n步；
+			3、forward和back一起步进，
+			   一定会在入环点相遇。
+		—————————————————*/
+		int cnt = hasCycle(head);
+		if (cnt == 0)
+			return NULL;
+		ListNode142* forward = head;
+		ListNode142* back = head;
+		for (int i = 0; i < cnt; ++i)
+			forward = forward->next;
+		while (forward != back)
+		{
+			forward = forward->next;
+			back = back->next;
+		}
+		return forward;
+	}
+private:
+	int hasCycle(ListNode142* head) {
+		ListNode142* fast = head;
+		ListNode142* slow = head;
+		while (fast != NULL && fast->next != NULL)
+		{
+			fast = fast->next->next;
+			slow = slow->next;
+			if (fast == slow)
+			{
+				int cnt = 0;
+				do
+				{
+					fast = fast->next;
+					cnt++;
+				} 
+				while (fast != slow);
+				return cnt;
+			}
+		}
+		return 0;
+	}
+};
+
 
 
 
@@ -7881,15 +8015,8 @@ public:
 
 int main()
 {
-	Solution138 s;
-	Node138* n1 = new Node138(1);
-	Node138* n2 = new Node138(2);
-	Node138* n3 = new Node138(3);
-	n1->next = n2;
-	n2->next = n3;
-	n1->random = n3;
-	n2->random = n2;
-	n3->random = n1;
-	Node138* ret = s.copyRandomList(n1);
+	Solution139 s;
+	vector<string> dict = vector <string>{ "leet", "code" };
+	s.wordBreak("leetcode", dict);
 	return 0;
 }
